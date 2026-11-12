@@ -1,0 +1,14 @@
+{
+  "id": "tokenflux-usage",
+  "name": "TokenFlux usage",
+  "description": "Shows TokenFlux quota, rolling limits, and subscription usage in Paseo's Usage screen.",
+  "translations": {
+    "zh-CN": {
+      "name": "TokenFlux 用量",
+      "description": "在 Paseo 的用量页显示 TokenFlux 的额度、滚动限额与订阅用量。"
+    }
+  },
+  "requirements": {
+    "paseo": ">=0.11.0"
+  }
+}
