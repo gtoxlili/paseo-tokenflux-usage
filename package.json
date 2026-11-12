@@ -1,7 +1,7 @@
 {
   "name": "paseo-tokenflux-usage",
   "private": true,
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Shows TokenFlux quota, subscription limits, and usage in Paseo's Usage screen.",
   "repository": {
     "type": "git",

@@ -1,4 +1,4 @@
-TokenFlux 用量把 TokenFlux 的额度放进 Paseo 的用量页。它显示订阅的月度套餐用量，套餐设置了日或周限额时也显示这两项；还有 API Key 的 5 小时、1 天、7 天滚动限额，Key 的总额度或钱包余额，以及今天和累计的请求数与 Token 数。每一行有限额百分比，TokenFlux 提供重置时间时也会显示。
+TokenFlux 用量把 TokenFlux 的额度放进 Paseo 的用量页。它显示订阅的月度套餐用量，套餐设置了日或周限额时也显示这两项；还有剩余的套餐 Credits、API Key 的 5 小时、1 天、7 天滚动限额、Key 的总额度或钱包余额，以及今天的请求数、Token 数和费用。每一行有限额百分比，TokenFlux 提供重置时间时也会显示。
 
 插件用你自己的 API Key 从 TokenFlux 的用量接口读取账号信息。卡片由 Paseo 绘制，并和其他用量来源一起刷新。
 
@@ -17,6 +17,6 @@ TokenFlux 用量把 TokenFlux 的额度放进 Paseo 的用量页。它显示订�
 
 密钥只会在每次刷新时作为 bearer token 发往 `https://tokenflux.dev/v1/usage`。插件不保存任何东西，也没有自己的界面，卡片由 Paseo 绘制。取密钥命令以守护进程的权限运行，和所有插件的服务端代码一样。
 
-卡片显示所配置 Key 的全局用量。agent 会话不提供登录信息，所以每个 agent 的上下文环里没有 TokenFlux 额度。订阅限额和用量来自同一个接口，单位按 TokenFlux 返回的值显示（多数账号是 Credits）。请求数、Token 数和费用汇总以文字行显示。
+卡片显示所配置 Key 的全局用量。agent 会话不提供登录信息，所以每个 agent 的上下文环里没有 TokenFlux 额度。订阅限额和用量来自同一个接口，单位按 TokenFlux 返回的值显示（多数账号是 Credits）。今天的请求数、Token 数和费用在同一行文字里显示。
 
 本插件是独立项目，与 TokenFlux 没有关联。

@@ -142,15 +142,15 @@ function balanceUnit(unit: string | undefined): UsageBalance["unit"] {
   return "credits";
 }
 
-function usageDetail(id: string, label: string, totals: Totals | undefined): UsageDetail | undefined {
-  if (!totals) return undefined;
+function todayDetail(totals: Totals | undefined, unit: string): UsageDetail | undefined {
+  if (!totals || (totals.requests === 0 && totals.total_tokens === 0)) return undefined;
   return {
-    id,
-    label,
+    id: "today",
+    label: "Today",
     value: [
       `${compactNumber.format(totals.requests)} requests`,
       `${compactNumber.format(totals.total_tokens)} tokens`,
-      `${plainNumber.format(totals.cost)} standard, ${plainNumber.format(totals.actual_cost)} actual`,
+      `${plainNumber.format(totals.actual_cost)}${unit ? ` ${unit}` : ""}`,
     ].join(" · "),
   };
 }
@@ -243,6 +243,21 @@ export function mapUsage(body: z.infer<typeof responseSchema>): UsageReport {
     });
   }
 
+  if (
+    subscription &&
+    body.billing.source === "subscription" &&
+    typeof body.billing.remaining === "number" &&
+    body.billing.remaining >= 0
+  ) {
+    balances.push({
+      id: "plan_credits",
+      label: "Plan credits",
+      remaining: body.billing.remaining,
+      unit: balanceUnit(body.billing.unit),
+      tone: body.billing.remaining <= 0 ? "danger" : "ok",
+    });
+  }
+
   const wallet = body.billing.source === "balance" ? (body.balance ?? body.billing.balance) : undefined;
   if (wallet != null) {
     balances.push({
@@ -254,10 +269,8 @@ export function mapUsage(body: z.infer<typeof responseSchema>): UsageReport {
     });
   }
 
-  const today = usageDetail("today", "Today", body.usage?.today);
+  const today = todayDetail(body.usage?.today, body.unit ?? body.billing.unit);
   if (today) details.push(today);
-  const total = usageDetail("total", "All time", body.usage?.total);
-  if (total) details.push(total);
 
   if (body.status) {
     details.push({
@@ -279,24 +292,16 @@ export function mapUsage(body: z.infer<typeof responseSchema>): UsageReport {
   }
 
   if (subscription) {
-    const parts = [subscription.status];
-    if (body.billing.source === "subscription" && typeof body.billing.remaining === "number") {
-      parts.push(`${plainNumber.format(body.billing.remaining)} ${body.billing.unit} left`);
-    }
-    parts.push(`expires ${subscription.expires_at.slice(0, 10)}`);
+    const active = subscription.status === "active";
     details.push({
       id: "subscription",
-      label: "Subscription",
-      value: parts.join(" · "),
-      tone: subscription.status === "active" ? "ok" : "danger",
+      label: active ? "Expires" : "Subscription",
+      value: active
+        ? subscription.expires_at.slice(0, 10)
+        : `${subscription.status} · ${subscription.expires_at.slice(0, 10)}`,
+      ...(active ? {} : { tone: "danger" as const }),
     });
   }
-
-  details.push({
-    id: "billing_source",
-    label: "Billing source",
-    value: body.billing.source === "subscription" ? "Subscription" : "Wallet",
-  });
 
   if (!body.billing.available) {
     details.push({ id: "funding", label: "Funding", value: "Unavailable", tone: "danger" });
@@ -345,5 +350,6 @@ export async function discover(scope: UsageScope): Promise<UsageAccount[]> {
   if (!keySource) return [];
 
   // One configured key identifies one TokenFlux account; the key itself never appears here.
-  return [{ key: "tokenflux", label: "TokenFlux", input: { keySource } }];
+  // No label: the card header already shows the source name, and a matching footer is noise.
+  return [{ key: "tokenflux", input: { keySource } }];
 }
